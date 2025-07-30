@@ -313,7 +313,7 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
     }
   };
 
-  const sendMessage = async (stepNumber: number, templateId?: string) => {
+  const sendMessage = async (stepNumber: number, templateId?: string, stepData?: any) => {
     try {
       let template;
       
@@ -365,6 +365,7 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
         step: stepNumber,
         template: template.message_content,
         data: previousStepsData,
+        currentStepData: stepData, // Inclui dados da etapa atual (incluindo payment_link para etapa 3)
       };
 
       // Enviar webhook
@@ -480,7 +481,7 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
                 isAccessible={isAccessible}
                 data={stepProgress?.data}
                 onComplete={(data) => handleStepComplete(step.number, data)}
-                onSendMessage={(templateId) => sendMessage(step.number, templateId)}
+                onSendMessage={(templateId, stepData) => sendMessage(step.number, templateId, stepData)}
               />
             );
           })}

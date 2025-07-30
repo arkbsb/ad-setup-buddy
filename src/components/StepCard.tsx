@@ -35,7 +35,7 @@ interface StepCardProps {
   isAccessible: boolean;
   data: any;
   onComplete: (data: any) => void;
-  onSendMessage: (templateId?: string) => void;
+  onSendMessage: (templateId?: string, stepData?: any) => void;
 }
 
 const StepCard = ({
@@ -52,6 +52,7 @@ const StepCard = ({
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [manualData, setManualData] = useState(data?.manual_info || "");
+  const [paymentLink, setPaymentLink] = useState(data?.payment_link || "");
 
   useEffect(() => {
     setIsExpanded(isCurrent);
@@ -79,7 +80,8 @@ const StepCard = ({
   const handleSave = () => {
     const dataToSave = {
       ...localData,
-      manual_info: manualData
+      manual_info: manualData,
+      ...(step.number === 3 && { payment_link: paymentLink })
     };
     onComplete(dataToSave);
   };
@@ -262,6 +264,20 @@ const StepCard = ({
             {renderStepContent()}
           </div>
           
+          {/* Campo específico para etapa 3 - Link de Pagamento */}
+          {step.number === 3 && (
+            <div className="space-y-2">
+              <Label htmlFor={`payment-link-${step.number}`}>Link de Pagamento</Label>
+              <Input
+                id={`payment-link-${step.number}`}
+                type="url"
+                value={paymentLink}
+                onChange={(e) => setPaymentLink(e.target.value)}
+                placeholder="Cole aqui o link de pagamento..."
+              />
+            </div>
+          )}
+          
           {/* Campo de informações manuais - SEMPRE visível */}
           <div className="space-y-2">
             <Label htmlFor={`manual-${step.number}`}>Informações desta etapa</Label>
@@ -294,7 +310,11 @@ const StepCard = ({
                 </Select>
               </div>
               <Button 
-                onClick={() => onSendMessage(selectedTemplate)} 
+                onClick={() => onSendMessage(selectedTemplate, {
+                  ...localData,
+                  manual_info: manualData,
+                  ...(step.number === 3 && { payment_link: paymentLink })
+                })} 
                 variant="secondary"
                 disabled={!selectedTemplate}
               >
