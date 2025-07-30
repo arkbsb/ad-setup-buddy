@@ -51,16 +51,15 @@ const StepCard = ({
   const [isExpanded, setIsExpanded] = useState(isCurrent);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+  const [manualData, setManualData] = useState(data?.manual_info || "");
 
   useEffect(() => {
     setIsExpanded(isCurrent);
   }, [isCurrent]);
 
   useEffect(() => {
-    if (isAccessible && !isCompleted) {
-      fetchTemplates();
-    }
-  }, [isAccessible, isCompleted]);
+    fetchTemplates();
+  }, []);
 
   const fetchTemplates = async () => {
     try {
@@ -78,7 +77,11 @@ const StepCard = ({
   };
 
   const handleSave = () => {
-    onComplete(localData);
+    const dataToSave = {
+      ...localData,
+      manual_info: manualData
+    };
+    onComplete(dataToSave);
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -259,14 +262,27 @@ const StepCard = ({
             {renderStepContent()}
           </div>
           
-          {/* Seletor de templates e envio de mensagem */}
-          {!isCompleted && templates.length > 0 && (
-            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
-              <h4 className="text-sm font-medium text-foreground">Template de Mensagem</h4>
-              <div className="space-y-3">
+          {/* Campo de informações manuais - SEMPRE visível */}
+          <div className="space-y-2">
+            <Label htmlFor={`manual-${step.number}`}>Informações desta etapa</Label>
+            <Textarea
+              id={`manual-${step.number}`}
+              value={manualData}
+              onChange={(e) => setManualData(e.target.value)}
+              placeholder="Adicione informações relevantes desta etapa..."
+              rows={3}
+            />
+          </div>
+          
+          {/* Seletor de templates e envio de mensagem - SEMPRE visível */}
+          <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+            <h4 className="text-sm font-medium text-foreground">Template de Mensagem</h4>
+            <div className="flex gap-2 items-end">
+              <div className="flex-1 space-y-2">
+                <Label>Template de mensagem</Label>
                 <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione um template para enviar" />
+                    <SelectValue placeholder="Selecione um template" />
                   </SelectTrigger>
                   <SelectContent>
                     {templates.map(template => (
@@ -276,28 +292,26 @@ const StepCard = ({
                     ))}
                   </SelectContent>
                 </Select>
-                
-                {selectedTemplate && (
-                  <div className="p-3 bg-background border rounded text-sm">
-                    <p className="text-muted-foreground mb-2">Preview:</p>
-                    <p className="text-foreground">
-                      {templates.find(t => t.id === selectedTemplate)?.message_content}
-                    </p>
-                  </div>
-                )}
-                
-                <Button
-                  variant="outline"
-                  onClick={() => onSendMessage(selectedTemplate)}
-                  disabled={!selectedTemplate}
-                  className="w-full"
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Enviar Mensagem
-                </Button>
               </div>
+              <Button 
+                onClick={() => onSendMessage(selectedTemplate)} 
+                variant="secondary"
+                disabled={!selectedTemplate}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Enviar Mensagem
+              </Button>
             </div>
-          )}
+            
+            {selectedTemplate && (
+              <div className="p-3 bg-background border rounded text-sm">
+                <p className="text-muted-foreground mb-2">Preview:</p>
+                <p className="text-foreground">
+                  {templates.find(t => t.id === selectedTemplate)?.message_content}
+                </p>
+              </div>
+            )}
+          </div>
 
           {/* Botões de ação */}
           {!isCompleted && (
