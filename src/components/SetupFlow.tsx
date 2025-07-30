@@ -27,6 +27,13 @@ interface SetupProgress {
   completed_at: string | null;
 }
 
+interface MessageTemplate {
+  id: string;
+  step_number: number;
+  template_name: string;
+  message_content: string;
+}
+
 interface SetupFlowProps {
   client: Client;
   onBack: () => void;
@@ -106,10 +113,12 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [progress, setProgress] = useState<SetupProgress[]>([]);
+  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchProgress();
+    fetchTemplates();
   }, [client.id]);
 
   const fetchProgress = async () => {
@@ -133,6 +142,23 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("message_templates")
+        .select("*")
+        .order("step_number");
+
+      if (error) {
+        throw error;
+      }
+
+      setTemplates(data || []);
+    } catch (error) {
+      console.error("Erro ao carregar templates:", error);
     }
   };
 
@@ -184,15 +210,68 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
 
   const sendMessage = async (stepNumber: number) => {
     try {
-      // TODO: Implementar envio de webhook
-      toast({
-        title: "Mensagem enviada!",
-        description: `Mensagem da etapa ${stepNumber} foi enviada.`,
+      const template = templates.find(t => t.step_number === stepNumber);
+      
+      if (!template) {
+        toast({
+          title: "Template não encontrado",
+          description: `Não há template configurado para a etapa ${stepNumber}.`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Coletar dados das etapas anteriores
+      const previousStepsData = progress
+        .filter(p => p.step_number < stepNumber && p.completed)
+        .reduce((acc, p) => {
+          acc[`step_${p.step_number}`] = p.data;
+          return acc;
+        }, {} as any);
+
+      const webhookData = {
+        client: {
+          name: client.name,
+          phone: client.phone,
+        },
+        step: stepNumber,
+        template: template.message_content,
+        data: previousStepsData,
+      };
+
+      // Enviar webhook
+      const webhookUrl = "https://autowebhook.gita.work/webhook/gita-sistema-setup-mensagens";
+      
+      const response = await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(webhookData),
       });
+
+      // Log do webhook
+      await supabase.from("webhooks_log").insert({
+        client_id: client.id,
+        step_number: stepNumber,
+        webhook_data: webhookData,
+        response_status: response.status,
+        response_data: response.ok ? await response.text() : null,
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Mensagem enviada!",
+          description: `Mensagem da etapa ${stepNumber} foi enviada com sucesso.`,
+        });
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (error) {
+      console.error("Erro ao enviar webhook:", error);
       toast({
         title: "Erro ao enviar mensagem",
-        description: "Ocorreu um erro ao enviar a mensagem.",
+        description: "Ocorreu um erro ao enviar a mensagem via webhook.",
         variant: "destructive",
       });
     }

@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, LogOut, Users, Clock, CheckCircle } from "lucide-react";
+import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 import ClientForm from "@/components/ClientForm";
 import SetupFlow from "@/components/SetupFlow";
 
@@ -104,6 +105,12 @@ const Dashboard = () => {
               </p>
             </div>
             <div className="flex items-center space-x-4">
+              <Link to="/templates">
+                <Button variant="outline">
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Templates
+                </Button>
+              </Link>
               <Button
                 onClick={() => setShowClientForm(true)}
                 className="bg-primary hover:bg-primary-hover"
