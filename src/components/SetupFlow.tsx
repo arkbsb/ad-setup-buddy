@@ -482,6 +482,7 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
                 data={stepProgress?.data}
                 onComplete={(data) => handleStepComplete(step.number, data)}
                 onSendMessage={(templateId, stepData) => sendMessage(step.number, templateId, stepData)}
+                clientId={client.id}
               />
             );
           })}

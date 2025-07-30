@@ -36,6 +36,7 @@ interface StepCardProps {
   data: any;
   onComplete: (data: any) => void;
   onSendMessage: (templateId?: string, stepData?: any) => void;
+  clientId: string;
 }
 
 const StepCard = ({
@@ -46,6 +47,7 @@ const StepCard = ({
   data,
   onComplete,
   onSendMessage,
+  clientId,
 }: StepCardProps) => {
   const [localData, setLocalData] = useState(data || {});
   const [isExpanded, setIsExpanded] = useState(isCurrent);
@@ -53,6 +55,11 @@ const StepCard = ({
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [manualData, setManualData] = useState(data?.manual_info || "");
   const [paymentLink, setPaymentLink] = useState(data?.payment_link || "");
+  const [creativesStatus, setCreativesStatus] = useState(
+    step.number === 4 ? (data?.creatives_status || 'pending') : ''
+  );
+  const [creativesInfo, setCreativesInfo] = useState(data?.creatives_info || '');
+  const [adsContent, setAdsContent] = useState(data?.ads_content || '');
 
   useEffect(() => {
     setIsExpanded(isCurrent);
@@ -77,13 +84,27 @@ const StepCard = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const dataToSave = {
       ...localData,
       manual_info: manualData,
-      ...(step.number === 3 && { payment_link: paymentLink })
+      ...(step.number === 3 && { payment_link: paymentLink }),
+      ...(step.number === 4 && { 
+        creatives_status: creativesStatus,
+        creatives_info: creativesInfo,
+        ads_content: adsContent
+      })
     };
+    
     onComplete(dataToSave);
+    
+    // Atualizar status na tabela clients quando for etapa 4
+    if (step.number === 4) {
+      await supabase
+        .from('clients')
+        .update({ creatives_status: creativesStatus })
+        .eq('id', clientId);
+    }
   };
 
   const handleInputChange = (field: string, value: any) => {
@@ -277,6 +298,45 @@ const StepCard = ({
               />
             </div>
           )}
+
+          {/* Campos específicos para etapa 4 - Criativos */}
+          {step.number === 4 && (
+            <>
+              <div className="space-y-2">
+                <Label>Status dos Criativos e Legendas</Label>
+                <Select value={creativesStatus} onValueChange={setCreativesStatus}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">⏳ Aguardando envio do cliente</SelectItem>
+                    <SelectItem value="received">📥 Recebidos - em análise</SelectItem>
+                    <SelectItem value="approved">✅ Aprovados - prontos para uso</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Detalhes dos Criativos</Label>
+                <Textarea
+                  value={creativesInfo}
+                  onChange={(e) => setCreativesInfo(e.target.value)}
+                  placeholder="Ex: 3 vídeos de 15s, 5 imagens 1080x1080..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Copys/Legendas dos Anúncios</Label>
+                <Textarea
+                  value={adsContent}
+                  onChange={(e) => setAdsContent(e.target.value)}
+                  placeholder="Cole as legendas aprovadas para os anúncios..."
+                  rows={4}
+                />
+              </div>
+            </>
+          )}
           
           {/* Campo de informações manuais - SEMPRE visível */}
           <div className="space-y-2">
@@ -313,8 +373,13 @@ const StepCard = ({
                 onClick={() => onSendMessage(selectedTemplate, {
                   ...localData,
                   manual_info: manualData,
-                  ...(step.number === 3 && { payment_link: paymentLink })
-                })} 
+                  ...(step.number === 3 && { payment_link: paymentLink }),
+                  ...(step.number === 4 && { 
+                    creatives_status: creativesStatus,
+                    creatives_info: creativesInfo,
+                    ads_content: adsContent
+                  })
+                })}
                 variant="secondary"
                 disabled={!selectedTemplate}
               >

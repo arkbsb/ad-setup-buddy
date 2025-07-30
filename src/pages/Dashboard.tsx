@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare } from "lucide-react";
+import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare, FileCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import ClientForm from "@/components/ClientForm";
 import SetupFlow from "@/components/SetupFlow";
@@ -67,12 +67,25 @@ const Dashboard = () => {
     switch (status) {
       case "pending":
         return <Badge variant="secondary">Aguardando</Badge>;
+      case "received":
+        return <Badge className="bg-blue-600 text-white">Recebidos</Badge>;
       case "approved":
         return <Badge className="bg-success text-success-foreground">Aprovado</Badge>;
-      case "reviewing":
-        return <Badge className="bg-warning text-warning-foreground">Em análise</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Clock className="w-4 h-4" />;
+      case "received":
+        return <FileCheck className="w-4 h-4" />;
+      case "approved":
+        return <CheckCircle className="w-4 h-4" />;
+      default:
+        return <Clock className="w-4 h-4" />;
     }
   };
 
@@ -201,8 +214,9 @@ const Dashboard = () => {
                         <h3 className="font-semibold text-lg">{client.name}</h3>
                         <p className="text-muted-foreground">{client.phone}</p>
                       </div>
-                      <div className="text-right">
-                        <div className="mb-2">
+                      <div className="text-right space-y-2">
+                        <div className="flex items-center gap-2 justify-end">
+                          {getStatusIcon(client.creatives_status)}
                           {getStatusBadge(client.creatives_status)}
                         </div>
                         <div className="text-sm text-muted-foreground">
