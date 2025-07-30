@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare, FileCheck } from "lucide-react";
+import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare, FileCheck, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import ClientForm from "@/components/ClientForm";
 import SetupFlow from "@/components/SetupFlow";
@@ -28,6 +29,7 @@ const Dashboard = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [showClientForm, setShowClientForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -92,6 +94,11 @@ const Dashboard = () => {
   const getProgressPercentage = (currentStep: number) => {
     return Math.min((currentStep - 1) / 10 * 100, 100);
   };
+
+  // Filter clients based on search term
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   if (selectedClient) {
     return (
@@ -187,6 +194,18 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="search"
+                  placeholder="Pesquisar cliente por nome..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 max-w-sm"
+                />
+              </div>
+            </div>
             {loading ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground">Carregando clientes...</p>
@@ -201,9 +220,15 @@ const Dashboard = () => {
                   Cadastrar primeiro cliente
                 </Button>
               </div>
+            ) : filteredClients.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {searchTerm ? 'Nenhum cliente encontrado com esse nome.' : 'Nenhum cliente cadastrado ainda.'}
+                </p>
+              </div>
             ) : (
               <div className="space-y-4">
-                {clients.map((client) => (
+                {filteredClients.map((client) => (
                   <div
                     key={client.id}
                     className="border rounded-lg p-4 hover:bg-muted/20 transition-colors cursor-pointer"
