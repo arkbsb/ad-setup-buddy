@@ -8,35 +8,62 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Background colors */
+    --background: 210 17% 94%; /* #EEE1 equivalent */
+    --foreground: 218 11% 9%; /* #181818 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    /* Card colors */
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 218 11% 9%;
 
+    /* Popover colors */
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 218 11% 9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Primary colors - Green theme */
+    --primary: 120 19% 22%; /* #5A7059 - green-800 */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 120 19% 18%; /* #364636 - green-900 */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Secondary colors */
+    --secondary: 120 15% 55%; /* #718570 - green-700 */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    /* Muted colors */
+    --muted: 0 0% 77%; /* #C5C5C5 borders */
+    --muted-foreground: 218 11% 46%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Accent colors - Purple */
+    --accent: 315 20% 58%; /* #A483A2 - purple links */
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Destructive colors */
+    --destructive: 15 58% 34%; /* #803F2E - red errors */
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    /* Border and input */
+    --border: 0 0% 77%; /* #C5C5C5 */
+    --input: 0 0% 96%;
+    --ring: 120 19% 22%;
 
-    --radius: 0.5rem;
+    /* Status colors */
+    --success: 120 19% 22%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 93% 47%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(120 19% 22%), hsl(120 15% 55%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 17% 96%));
+
+    /* Shadows */
+    --shadow-card: 0 4px 6px -1px hsl(120 19% 22% / 0.1);
+    --shadow-elevated: 0 10px 15px -3px hsl(120 19% 22% / 0.1);
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
