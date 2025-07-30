@@ -21,6 +21,7 @@ interface Client {
 
 interface SetupProgress {
   id: string;
+  client_id?: string;
   step_number: number;
   completed: boolean;
   data: any;
@@ -115,6 +116,8 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
   const [progress, setProgress] = useState<SetupProgress[]>([]);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [currentStep, setCurrentStep] = useState(client.current_step);
 
   useEffect(() => {
     fetchProgress();
@@ -134,6 +137,10 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
       }
 
       setProgress(data || []);
+      
+      // Atualizar estado local dos steps concluídos
+      const completed = (data || []).filter(p => p.completed).map(p => p.step_number);
+      setCompletedSteps(completed);
     } catch (error) {
       toast({
         title: "Erro ao carregar progresso",
@@ -191,12 +198,110 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
         if (error) throw error;
       }
 
-      await fetchProgress();
+      // Atualizar estado local das etapas concluídas
+      setCompletedSteps(prev => {
+        if (!prev.includes(stepNumber)) {
+          return [...prev, stepNumber];
+        }
+        return prev;
+      });
+
+      // Atualizar progress local
+      setProgress(prev => {
+        const updatedProgress = [...prev];
+        const existingIndex = updatedProgress.findIndex(p => p.step_number === stepNumber);
+        
+        if (existingIndex >= 0) {
+          updatedProgress[existingIndex] = {
+            ...updatedProgress[existingIndex],
+            completed: true,
+            data: data,
+            completed_at: new Date().toISOString(),
+          };
+        } else {
+          updatedProgress.push({
+            id: `temp-${stepNumber}`,
+            client_id: client.id,
+            step_number: stepNumber,
+            completed: true,
+            data: data,
+            completed_at: new Date().toISOString(),
+          });
+        }
+        
+        return updatedProgress;
+      });
+
+      // Atualizar current_step do cliente localmente se necessário
+      if (stepNumber === currentStep) {
+        const newCurrentStep = stepNumber + 1;
+        setCurrentStep(newCurrentStep);
+        
+        // Atualizar no banco também
+        await supabase
+          .from('clients')
+          .update({ current_step: newCurrentStep })
+          .eq('id', client.id);
+      }
+      
       onUpdate();
 
       toast({
         title: "Etapa concluída!",
         description: `Etapa ${stepNumber} foi marcada como concluída.`,
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar progresso:", error);
+      toast({
+        title: "Erro ao salvar progresso",
+        description: "Ocorreu um erro ao salvar o progresso da etapa.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleStepUncomplete = async (stepNumber: number) => {
+    try {
+      const existingStep = progress.find(p => p.step_number === stepNumber);
+      
+      if (existingStep) {
+        const { error } = await supabase
+          .from("setup_progress")
+          .update({
+            completed: false,
+            completed_at: null,
+          })
+          .eq("id", existingStep.id);
+
+        if (error) throw error;
+      }
+
+      // Atualizar estado local
+      setCompletedSteps(prev => prev.filter(s => s !== stepNumber));
+      
+      // Atualizar progress local
+      setProgress(prev => {
+        return prev.map(p => 
+          p.step_number === stepNumber 
+            ? { ...p, completed: false, completed_at: null }
+            : p
+        );
+      });
+
+      // Se desconcluir etapa atual, voltar current_step
+      if (stepNumber <= currentStep) {
+        setCurrentStep(stepNumber);
+        await supabase
+          .from('clients')
+          .update({ current_step: stepNumber })
+          .eq('id', client.id);
+      }
+
+      onUpdate();
+
+      toast({
+        title: "Etapa desmarcada",
+        description: `Etapa ${stepNumber} foi desmarcada como concluída.`,
       });
     } catch (error) {
       console.error("Erro ao atualizar progresso:", error);
@@ -362,9 +467,9 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
         <div className="space-y-6">
           {SETUP_STEPS.map((step) => {
             const stepProgress = getStepProgress(step.number);
-            const isCompleted = stepProgress?.completed || false;
-            const isCurrent = step.number === client.current_step;
-            const isAccessible = step.number <= client.current_step;
+            const isCompleted = completedSteps.includes(step.number);
+            const isCurrent = step.number === currentStep;
+            const isAccessible = step.number <= currentStep;
 
             return (
               <StepCard
