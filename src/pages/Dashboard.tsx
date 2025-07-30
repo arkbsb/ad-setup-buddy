@@ -18,6 +18,7 @@ interface Client {
   phone: string;
   current_step: number;
   creatives_status: string;
+  captions_status?: string;
   created_at: string;
   is_completed: boolean;
 }
@@ -93,6 +94,20 @@ const Dashboard = () => {
 
   const getProgressPercentage = (currentStep: number) => {
     return Math.min((currentStep - 1) / 10 * 100, 100);
+  };
+
+  const getConsolidatedStatus = (creativesStatus: string, captionsStatus?: string) => {
+    // Se não tem captions_status, usa apenas o creatives_status
+    if (!captionsStatus) return creativesStatus;
+    
+    // Lógica para status consolidado
+    if (creativesStatus === 'approved' && captionsStatus === 'approved') {
+      return 'approved';
+    }
+    if (creativesStatus === 'received' || captionsStatus === 'received') {
+      return 'received';
+    }
+    return 'pending';
   };
 
   // Filter clients based on search term
@@ -240,10 +255,23 @@ const Dashboard = () => {
                         <p className="text-muted-foreground">{client.phone}</p>
                       </div>
                       <div className="text-right space-y-2">
-                        <div className="flex items-center gap-2 justify-end">
-                          {getStatusIcon(client.creatives_status)}
-                          {getStatusBadge(client.creatives_status)}
-                        </div>
+                        {client.captions_status ? (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 justify-end text-xs">
+                              <span className="text-muted-foreground">Criativos:</span>
+                              {getStatusBadge(client.creatives_status)}
+                            </div>
+                            <div className="flex items-center gap-2 justify-end text-xs">
+                              <span className="text-muted-foreground">Legendas:</span>
+                              {getStatusBadge(client.captions_status)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 justify-end">
+                            {getStatusIcon(client.creatives_status)}
+                            {getStatusBadge(client.creatives_status)}
+                          </div>
+                        )}
                         <div className="text-sm text-muted-foreground">
                           Etapa {client.current_step}/10
                         </div>

@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { CheckCircle2, Circle, Send, Clock } from "lucide-react";
 
 interface StepConfig {
@@ -55,9 +56,11 @@ const StepCard = ({
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [manualData, setManualData] = useState(data?.manual_info || "");
   const [paymentLink, setPaymentLink] = useState(data?.payment_link || "");
-  const [creativesStatus, setCreativesStatus] = useState(
-    step.number === 4 ? (data?.creatives_status || 'pending') : ''
-  );
+  // Estados para etapa 4 - Toggles e status separados
+  const [waitingCreatives, setWaitingCreatives] = useState(data?.waiting_creatives || false);
+  const [waitingCaptions, setWaitingCaptions] = useState(data?.waiting_captions || false);
+  const [creativesStatus, setCreativesStatus] = useState(data?.creatives_status || 'pending');
+  const [captionsStatus, setCaptionsStatus] = useState(data?.captions_status || 'pending');
   const [creativesInfo, setCreativesInfo] = useState(data?.creatives_info || '');
   const [adsContent, setAdsContent] = useState(data?.ads_content || '');
 
@@ -90,7 +93,10 @@ const StepCard = ({
       manual_info: manualData,
       ...(step.number === 3 && { payment_link: paymentLink }),
       ...(step.number === 4 && { 
-        creatives_status: creativesStatus,
+        waiting_creatives: waitingCreatives,
+        waiting_captions: waitingCaptions,
+        creatives_status: waitingCreatives ? creativesStatus : null,
+        captions_status: waitingCaptions ? captionsStatus : null,
         creatives_info: creativesInfo,
         ads_content: adsContent
       })
@@ -102,7 +108,10 @@ const StepCard = ({
     if (step.number === 4) {
       await supabase
         .from('clients')
-        .update({ creatives_status: creativesStatus })
+        .update({ 
+          creatives_status: waitingCreatives ? creativesStatus : null,
+          captions_status: waitingCaptions ? captionsStatus : null
+        })
         .eq('id', clientId);
     }
   };
@@ -299,23 +308,56 @@ const StepCard = ({
             </div>
           )}
 
-          {/* Campos específicos para etapa 4 - Criativos */}
+          {/* Campos específicos para etapa 4 - Criativos com Toggles */}
           {step.number === 4 && (
             <>
+              {/* Toggle Criativos */}
               <div className="space-y-2">
-                <Label>Status dos Criativos e Legendas</Label>
-                <Select value={creativesStatus} onValueChange={setCreativesStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">⏳ Aguardando envio do cliente</SelectItem>
-                    <SelectItem value="received">📥 Recebidos - em análise</SelectItem>
-                    <SelectItem value="approved">✅ Aprovados - prontos para uso</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label>Aguardando Criativos</Label>
+                  <Switch
+                    checked={waitingCreatives}
+                    onCheckedChange={setWaitingCreatives}
+                  />
+                </div>
+                {waitingCreatives && (
+                  <Select value={creativesStatus} onValueChange={setCreativesStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">⏳ Aguardando envio do cliente</SelectItem>
+                      <SelectItem value="received">📥 Recebidos - em análise</SelectItem>
+                      <SelectItem value="approved">✅ Aprovados - prontos para uso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
+              {/* Toggle Legendas */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Aguardando Legendas/Copys</Label>
+                  <Switch
+                    checked={waitingCaptions}
+                    onCheckedChange={setWaitingCaptions}
+                  />
+                </div>
+                {waitingCaptions && (
+                  <Select value={captionsStatus} onValueChange={setCaptionsStatus}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">⏳ Aguardando envio do cliente</SelectItem>
+                      <SelectItem value="received">📥 Recebidos - em análise</SelectItem>
+                      <SelectItem value="approved">✅ Aprovados - prontos para uso</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+
+              {/* Campos de detalhes existentes */}
               <div className="space-y-2">
                 <Label>Detalhes dos Criativos</Label>
                 <Textarea
@@ -375,7 +417,10 @@ const StepCard = ({
                   manual_info: manualData,
                   ...(step.number === 3 && { payment_link: paymentLink }),
                   ...(step.number === 4 && { 
-                    creatives_status: creativesStatus,
+                    waiting_creatives: waitingCreatives,
+                    waiting_captions: waitingCaptions,
+                    creatives_status: waitingCreatives ? creativesStatus : null,
+                    captions_status: waitingCaptions ? captionsStatus : null,
                     creatives_info: creativesInfo,
                     ads_content: adsContent
                   })

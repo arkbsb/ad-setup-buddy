@@ -130,9 +130,11 @@ export type Database = {
       }
       clients: {
         Row: {
+          captions_status: string
           created_at: string
           creatives_status: string
           current_step: number
+          email: string | null
           id: string
           is_completed: boolean
           name: string
@@ -141,9 +143,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          captions_status?: string
           created_at?: string
           creatives_status?: string
           current_step?: number
+          email?: string | null
           id?: string
           is_completed?: boolean
           name: string
@@ -152,9 +156,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          captions_status?: string
           created_at?: string
           creatives_status?: string
           current_step?: number
+          email?: string | null
           id?: string
           is_completed?: boolean
           name?: string
