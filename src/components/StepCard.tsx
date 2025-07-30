@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -6,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CheckCircle2, Circle, Send, Clock } from "lucide-react";
 
 interface StepConfig {
@@ -19,6 +21,13 @@ interface StepConfig {
   inputLabels?: string[];
 }
 
+interface MessageTemplate {
+  id: string;
+  step_number: number;
+  template_name: string;
+  message_content: string;
+}
+
 interface StepCardProps {
   step: StepConfig;
   isCompleted: boolean;
@@ -26,7 +35,7 @@ interface StepCardProps {
   isAccessible: boolean;
   data: any;
   onComplete: (data: any) => void;
-  onSendMessage: () => void;
+  onSendMessage: (templateId?: string) => void;
 }
 
 const StepCard = ({
@@ -40,6 +49,34 @@ const StepCard = ({
 }: StepCardProps) => {
   const [localData, setLocalData] = useState(data || {});
   const [isExpanded, setIsExpanded] = useState(isCurrent);
+  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("");
+
+  useEffect(() => {
+    if (isAccessible && !isCompleted) {
+      fetchTemplates();
+    }
+  }, [step.number, isAccessible, isCompleted]);
+
+  const fetchTemplates = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('message_templates')
+        .select('*')
+        .eq('step_number', step.number)
+        .order('template_name');
+
+      if (error) throw error;
+      setTemplates(data || []);
+      
+      // Auto-selecionar o primeiro template se houver apenas um
+      if (data && data.length === 1) {
+        setSelectedTemplate(data[0].id);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar templates:', error);
+    }
+  };
 
   const handleSave = () => {
     onComplete(localData);
@@ -213,18 +250,35 @@ const StepCard = ({
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {isAccessible && !isCompleted && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onSendMessage();
-                }}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                Enviar Mensagem
-              </Button>
+            {isAccessible && !isCompleted && templates.length > 0 && (
+              <>
+                <div className="flex-1">
+                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione um template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map(template => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.template_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSendMessage(selectedTemplate);
+                  }}
+                  disabled={!selectedTemplate}
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Enviar Mensagem
+                </Button>
+              </>
             )}
           </div>
         </div>

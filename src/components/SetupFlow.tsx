@@ -208,9 +208,32 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
     }
   };
 
-  const sendMessage = async (stepNumber: number) => {
+  const sendMessage = async (stepNumber: number, templateId?: string) => {
     try {
-      const template = templates.find(t => t.step_number === stepNumber);
+      let template;
+      
+      if (templateId) {
+        // Buscar template específico pelo ID
+        const { data, error } = await supabase
+          .from("message_templates")
+          .select("*")
+          .eq("id", templateId)
+          .single();
+          
+        if (error) throw error;
+        template = data;
+      } else {
+        // Fallback: buscar qualquer template da etapa
+        const { data, error } = await supabase
+          .from("message_templates")
+          .select("*")
+          .eq("step_number", stepNumber)
+          .limit(1)
+          .single();
+          
+        if (error) throw error;
+        template = data;
+      }
       
       if (!template) {
         toast({
@@ -352,7 +375,7 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
                 isAccessible={isAccessible}
                 data={stepProgress?.data}
                 onComplete={(data) => handleStepComplete(step.number, data)}
-                onSendMessage={() => sendMessage(step.number)}
+                onSendMessage={(templateId) => sendMessage(step.number, templateId)}
               />
             );
           })}
