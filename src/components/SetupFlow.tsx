@@ -65,9 +65,9 @@ const SETUP_STEPS = [
   {
     number: 4,
     title: "Solicitar criativos",
-    description: "Aguardar envio dos materiais criativos do cliente",
+    description: "Gerenciar envio dos materiais criativos do cliente",
     type: "action" as const,
-    actionText: "Marcar como aguardando cliente"
+    actionText: "Configurar criativos"
   },
   {
     number: 5,
