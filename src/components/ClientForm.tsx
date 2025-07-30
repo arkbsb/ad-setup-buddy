@@ -20,6 +20,7 @@ const ClientForm = ({ onClose, onSuccess }: ClientFormProps) => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
+    email: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -35,6 +36,7 @@ const ClientForm = ({ onClose, onSuccess }: ClientFormProps) => {
           user_id: user.id,
           name: formData.name,
           phone: formData.phone,
+          email: formData.email,
           current_step: 1,
           creatives_status: "pending",
         });
@@ -102,6 +104,17 @@ const ClientForm = ({ onClose, onSuccess }: ClientFormProps) => {
               value={formData.phone}
               onChange={handleInputChange("phone")}
               required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange("email")}
+              placeholder="email@exemplo.com"
             />
           </div>
           
