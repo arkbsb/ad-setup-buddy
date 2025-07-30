@@ -60,23 +60,18 @@ const StepCard = ({
     if (isAccessible && !isCompleted) {
       fetchTemplates();
     }
-  }, [step.number, isAccessible, isCompleted]);
+  }, [isAccessible, isCompleted]);
 
   const fetchTemplates = async () => {
     try {
       const { data, error } = await supabase
         .from('message_templates')
         .select('*')
-        .eq('step_number', step.number)
-        .order('template_name');
+        .order('step_number', { ascending: true })
+        .order('template_name', { ascending: true });
 
       if (error) throw error;
       setTemplates(data || []);
-      
-      // Auto-selecionar o primeiro template se houver apenas um
-      if (data && data.length === 1) {
-        setSelectedTemplate(data[0].id);
-      }
     } catch (error) {
       console.error('Erro ao buscar templates:', error);
     }
@@ -276,7 +271,7 @@ const StepCard = ({
                   <SelectContent>
                     {templates.map(template => (
                       <SelectItem key={template.id} value={template.id}>
-                        {template.template_name}
+                        {template.template_name} {template.step_number && `(Etapa ${template.step_number})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
