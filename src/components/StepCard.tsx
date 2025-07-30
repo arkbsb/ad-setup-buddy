@@ -53,6 +53,10 @@ const StepCard = ({
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
 
   useEffect(() => {
+    setIsExpanded(isCurrent);
+  }, [isCurrent]);
+
+  useEffect(() => {
     if (isAccessible && !isCompleted) {
       fetchTemplates();
     }
@@ -249,51 +253,64 @@ const StepCard = ({
               <CardDescription>{step.description}</CardDescription>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
-            {isAccessible && !isCompleted && templates.length > 0 && (
-              <>
-                <div className="flex-1">
-                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione um template" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templates.map(template => (
-                        <SelectItem key={template.id} value={template.id}>
-                          {template.template_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSendMessage(selectedTemplate);
-                  }}
-                  disabled={!selectedTemplate}
-                >
-                  <Send className="h-4 w-4 mr-2" />
-                  Enviar Mensagem
-                </Button>
-              </>
-            )}
-          </div>
         </div>
       </CardHeader>
 
       {isExpanded && isAccessible && (
-        <CardContent className="space-y-4">
-          {renderStepContent()}
+        <CardContent className="space-y-6">
+          {/* Formulário da etapa */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-medium text-foreground">Informações da Etapa</h4>
+            {renderStepContent()}
+          </div>
           
+          {/* Seletor de templates e envio de mensagem */}
+          {!isCompleted && templates.length > 0 && (
+            <div className="space-y-4 p-4 border rounded-lg bg-muted/30">
+              <h4 className="text-sm font-medium text-foreground">Template de Mensagem</h4>
+              <div className="space-y-3">
+                <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um template para enviar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map(template => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.template_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {selectedTemplate && (
+                  <div className="p-3 bg-background border rounded text-sm">
+                    <p className="text-muted-foreground mb-2">Preview:</p>
+                    <p className="text-foreground">
+                      {templates.find(t => t.id === selectedTemplate)?.message_content}
+                    </p>
+                  </div>
+                )}
+                
+                <Button
+                  variant="outline"
+                  onClick={() => onSendMessage(selectedTemplate)}
+                  disabled={!selectedTemplate}
+                  className="w-full"
+                >
+                  <Send className="h-4 w-4 mr-2" />
+                  Enviar Mensagem
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Botões de ação */}
           {!isCompleted && (
             <div className="flex justify-end space-x-2 pt-4 border-t">
               <Button
                 onClick={handleSave}
                 disabled={!canComplete()}
-                className="bg-primary hover:bg-primary-hover"
+                className="bg-primary hover:bg-primary/90"
               >
                 Marcar como concluída
               </Button>
