@@ -254,28 +254,36 @@ const Dashboard = () => {
                         <h3 className="font-semibold text-lg">{client.name}</h3>
                         <p className="text-muted-foreground">{client.phone}</p>
                       </div>
-                      <div className="text-right space-y-2">
-                        {client.captions_status ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 justify-end text-xs">
-                              <span className="text-muted-foreground">Criativos:</span>
-                              {getStatusBadge(client.creatives_status)}
-                            </div>
-                            <div className="flex items-center gap-2 justify-end text-xs">
-                              <span className="text-muted-foreground">Legendas:</span>
-                              {getStatusBadge(client.captions_status)}
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2 justify-end">
-                            {getStatusIcon(client.creatives_status)}
-                            {getStatusBadge(client.creatives_status)}
-                          </div>
-                        )}
-                        <div className="text-sm text-muted-foreground">
-                          Etapa {client.current_step}/10
-                        </div>
-                      </div>
+                       <div className="text-right space-y-2">
+                         {client.creatives_status && (
+                           <div className="flex items-center gap-2 justify-end">
+                             {client.creatives_status === 'pending' && (
+                               <span className="flex items-center gap-1 text-yellow-600 text-sm">
+                                 <Clock className="w-4 h-4" />
+                                 Aguardando envio
+                               </span>
+                             )}
+                             {client.creatives_status === 'received' && (
+                               <span className="flex items-center gap-1 text-blue-600 text-sm">
+                                 <FileCheck className="w-4 h-4" />
+                                 Em análise
+                               </span>
+                             )}
+                             {client.creatives_status === 'approved' && (
+                               <span className="flex items-center gap-1 text-green-600 text-sm">
+                                 <CheckCircle className="w-4 h-4" />
+                                 Aprovados
+                               </span>
+                             )}
+                           </div>
+                         )}
+                         {!client.creatives_status && (
+                           <span className="text-gray-400 text-sm">-</span>
+                         )}
+                         <div className="text-sm text-muted-foreground">
+                           Etapa {client.current_step}/10
+                         </div>
+                       </div>
                     </div>
                     
                     <div className="space-y-2">

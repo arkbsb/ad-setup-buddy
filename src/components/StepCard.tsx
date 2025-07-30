@@ -106,11 +106,25 @@ const StepCard = ({
     
     // Atualizar status na tabela clients quando for etapa 4
     if (step.number === 4) {
+      // Determinar o status baseado nos toggles e seleções
+      let combinedStatus = null;
+      
+      if (waitingCreatives || waitingCaptions) {
+        // Priorizar o status mais "atrasado"
+        if (creativesStatus === 'pending' || captionsStatus === 'pending') {
+          combinedStatus = 'pending';
+        } else if (creativesStatus === 'received' || captionsStatus === 'received') {
+          combinedStatus = 'received';
+        } else if ((!waitingCreatives || creativesStatus === 'approved') && 
+                   (!waitingCaptions || captionsStatus === 'approved')) {
+          combinedStatus = 'approved';
+        }
+      }
+      
       await supabase
         .from('clients')
         .update({ 
-          creatives_status: waitingCreatives ? creativesStatus : null,
-          captions_status: waitingCaptions ? captionsStatus : null
+          creatives_status: combinedStatus 
         })
         .eq('id', clientId);
     }
