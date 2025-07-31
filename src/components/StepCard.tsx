@@ -72,6 +72,53 @@ const StepCard = ({
     fetchTemplates();
   }, []);
 
+  // Autosave para etapa 4 quando toggles mudam
+  useEffect(() => {
+    if (step.number === 4 && (data?.waiting_creatives !== undefined || data?.waiting_captions !== undefined)) {
+      handleAutoSave();
+    }
+  }, [waitingCreatives, waitingCaptions, creativesStatus, captionsStatus]);
+
+  const handleAutoSave = async () => {
+    if (step.number !== 4) return;
+    
+    // Determinar o status baseado nos toggles e seleções
+    let combinedStatus = null;
+    
+    if (waitingCreatives || waitingCaptions) {
+      // Priorizar o status mais "atrasado"
+      if (creativesStatus === 'pending' || captionsStatus === 'pending') {
+        combinedStatus = 'pending';
+      } else if (creativesStatus === 'received' || captionsStatus === 'received') {
+        combinedStatus = 'received';
+      } else if ((!waitingCreatives || creativesStatus === 'approved') && 
+                 (!waitingCaptions || captionsStatus === 'approved')) {
+        combinedStatus = 'approved';
+      }
+    }
+    
+    const dataToSave = {
+      ...localData,
+      manual_info: manualData,
+      waiting_creatives: waitingCreatives,
+      waiting_captions: waitingCaptions,
+      creatives_status: waitingCreatives ? creativesStatus : null,
+      captions_status: waitingCaptions ? captionsStatus : null,
+      creatives_info: creativesInfo,
+      ads_content: adsContent
+    };
+    
+    onComplete(dataToSave);
+    
+    // Atualizar status na tabela clients
+    await supabase
+      .from('clients')
+      .update({ 
+        creatives_status: combinedStatus 
+      })
+      .eq('id', clientId);
+  };
+
   const fetchTemplates = async () => {
     try {
       const { data, error } = await supabase
