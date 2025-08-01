@@ -130,9 +130,9 @@ export type Database = {
       }
       clients: {
         Row: {
-          captions_status: string
+          captions_status: string | null
           created_at: string
-          creatives_status: string
+          creatives_status: string | null
           current_step: number
           email: string | null
           id: string
@@ -143,9 +143,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          captions_status?: string
+          captions_status?: string | null
           created_at?: string
-          creatives_status?: string
+          creatives_status?: string | null
           current_step?: number
           email?: string | null
           id?: string
@@ -156,9 +156,9 @@ export type Database = {
           user_id: string
         }
         Update: {
-          captions_status?: string
+          captions_status?: string | null
           created_at?: string
-          creatives_status?: string
+          creatives_status?: string | null
           current_step?: number
           email?: string | null
           id?: string
