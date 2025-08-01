@@ -255,35 +255,65 @@ const Dashboard = () => {
                         <p className="text-muted-foreground">{client.phone}</p>
                       </div>
                        <div className="text-right space-y-2">
-                         {client.creatives_status && (
-                           <div className="flex items-center gap-2 justify-end">
-                             {client.creatives_status === 'pending' && (
-                               <span className="flex items-center gap-1 text-yellow-600 text-sm">
-                                 <Clock className="w-4 h-4" />
-                                 Aguardando envio
-                               </span>
-                             )}
-                             {client.creatives_status === 'received' && (
-                               <span className="flex items-center gap-1 text-blue-600 text-sm">
-                                 <FileCheck className="w-4 h-4" />
-                                 Em análise
-                               </span>
-                             )}
-                             {client.creatives_status === 'approved' && (
-                               <span className="flex items-center gap-1 text-green-600 text-sm">
-                                 <CheckCircle className="w-4 h-4" />
-                                 Aprovados
-                               </span>
-                             )}
-                           </div>
-                         )}
-                         {!client.creatives_status && (
-                           <span className="text-gray-400 text-sm">-</span>
-                         )}
-                         <div className="text-sm text-muted-foreground">
-                           Etapa {client.current_step}/10
-                         </div>
-                       </div>
+                          {/* Status dos Criativos */}
+                          {client.creatives_status && (
+                            <div className="flex items-center gap-2 justify-end">
+                              <span className="text-xs text-muted-foreground">Criativos:</span>
+                              {client.creatives_status === 'pending' && (
+                                <span className="flex items-center gap-1 text-yellow-600 text-sm">
+                                  <Clock className="w-3 h-3" />
+                                  Aguardando envio
+                                </span>
+                              )}
+                              {client.creatives_status === 'received' && (
+                                <span className="flex items-center gap-1 text-blue-600 text-sm">
+                                  <FileCheck className="w-3 h-3" />
+                                  Em análise
+                                </span>
+                              )}
+                              {client.creatives_status === 'approved' && (
+                                <span className="flex items-center gap-1 text-green-600 text-sm">
+                                  <CheckCircle className="w-3 h-3" />
+                                  Aprovados
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Status das Legendas */}
+                          {client.captions_status && (
+                            <div className="flex items-center gap-2 justify-end">
+                              <span className="text-xs text-muted-foreground">Legendas:</span>
+                              {client.captions_status === 'pending' && (
+                                <span className="flex items-center gap-1 text-yellow-600 text-sm">
+                                  <Clock className="w-3 h-3" />
+                                  Aguardando envio
+                                </span>
+                              )}
+                              {client.captions_status === 'received' && (
+                                <span className="flex items-center gap-1 text-blue-600 text-sm">
+                                  <FileCheck className="w-3 h-3" />
+                                  Em análise
+                                </span>
+                              )}
+                              {client.captions_status === 'approved' && (
+                                <span className="flex items-center gap-1 text-green-600 text-sm">
+                                  <CheckCircle className="w-3 h-3" />
+                                  Aprovados
+                                </span>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Se não há nenhum status, mostrar - */}
+                          {!client.creatives_status && !client.captions_status && (
+                            <span className="text-gray-400 text-sm">-</span>
+                          )}
+                          
+                          <div className="text-sm text-muted-foreground">
+                            Etapa {client.current_step}/10
+                          </div>
+                        </div>
                     </div>
                     
                     <div className="space-y-2">

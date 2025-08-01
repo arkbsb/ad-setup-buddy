@@ -115,11 +115,12 @@ const StepCard = ({
     
     onComplete(dataToSave);
     
-    // Atualizar status na tabela clients
+    // Atualizar status individuais na tabela clients
     await supabase
       .from('clients')
       .update({ 
-        creatives_status: combinedStatus 
+        creatives_status: waitingCreatives ? creativesStatus : null,
+        captions_status: waitingCaptions ? captionsStatus : null
       })
       .eq('id', clientId);
   };
@@ -181,7 +182,8 @@ const StepCard = ({
       await supabase
         .from('clients')
         .update({ 
-          creatives_status: combinedStatus 
+          creatives_status: waitingCreatives ? creativesStatus : null,
+          captions_status: waitingCaptions ? captionsStatus : null
         })
         .eq('id', clientId);
     }
