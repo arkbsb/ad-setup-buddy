@@ -72,9 +72,9 @@ const StepCard = ({
     fetchTemplates();
   }, []);
 
-  // Autosave para etapa 4 quando toggles mudam
+  // Autosave para etapa 4 quando toggles ou status mudam
   useEffect(() => {
-    if (step.number === 4 && (data?.waiting_creatives !== undefined || data?.waiting_captions !== undefined)) {
+    if (step.number === 4) {
       handleAutoSave();
     }
   }, [waitingCreatives, waitingCaptions, creativesStatus, captionsStatus]);
