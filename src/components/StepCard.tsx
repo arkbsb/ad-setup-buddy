@@ -87,12 +87,17 @@ const StepCard = ({
     
     if (waitingCreatives || waitingCaptions) {
       // Priorizar o status mais "atrasado"
-      if (creativesStatus === 'pending' || captionsStatus === 'pending') {
+      if ((waitingCreatives && creativesStatus === 'pending') || 
+          (waitingCaptions && captionsStatus === 'pending')) {
         combinedStatus = 'pending';
-      } else if (creativesStatus === 'received' || captionsStatus === 'received') {
+      } else if ((waitingCreatives && creativesStatus === 'received') || 
+                 (waitingCaptions && captionsStatus === 'received')) {
         combinedStatus = 'received';
-      } else if ((!waitingCreatives || creativesStatus === 'approved') && 
-                 (!waitingCaptions || captionsStatus === 'approved')) {
+      } else if ((waitingCreatives && creativesStatus === 'approved') && 
+                 (waitingCaptions && captionsStatus === 'approved')) {
+        combinedStatus = 'approved';
+      } else if ((waitingCreatives && creativesStatus === 'approved' && !waitingCaptions) ||
+                 (waitingCaptions && captionsStatus === 'approved' && !waitingCreatives)) {
         combinedStatus = 'approved';
       }
     }
@@ -158,12 +163,17 @@ const StepCard = ({
       
       if (waitingCreatives || waitingCaptions) {
         // Priorizar o status mais "atrasado"
-        if (creativesStatus === 'pending' || captionsStatus === 'pending') {
+        if ((waitingCreatives && creativesStatus === 'pending') || 
+            (waitingCaptions && captionsStatus === 'pending')) {
           combinedStatus = 'pending';
-        } else if (creativesStatus === 'received' || captionsStatus === 'received') {
+        } else if ((waitingCreatives && creativesStatus === 'received') || 
+                   (waitingCaptions && captionsStatus === 'received')) {
           combinedStatus = 'received';
-        } else if ((!waitingCreatives || creativesStatus === 'approved') && 
-                   (!waitingCaptions || captionsStatus === 'approved')) {
+        } else if ((waitingCreatives && creativesStatus === 'approved') && 
+                   (waitingCaptions && captionsStatus === 'approved')) {
+          combinedStatus = 'approved';
+        } else if ((waitingCreatives && creativesStatus === 'approved' && !waitingCaptions) ||
+                   (waitingCaptions && captionsStatus === 'approved' && !waitingCreatives)) {
           combinedStatus = 'approved';
         }
       }
