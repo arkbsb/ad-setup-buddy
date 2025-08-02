@@ -7,7 +7,18 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare, FileCheck, Search } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare, FileCheck, Search, Trash2, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import ClientForm from "@/components/ClientForm";
 import SetupFlow from "@/components/SetupFlow";
@@ -31,6 +42,7 @@ const Dashboard = () => {
   const [showClientForm, setShowClientForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -63,6 +75,34 @@ const Dashboard = () => {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+  };
+
+  const handleDeleteClient = async (clientId: string) => {
+    setDeletingId(clientId);
+    try {
+      const { error } = await supabase
+        .from('clients')
+        .delete()
+        .eq('id', clientId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Cliente excluído com sucesso",
+        description: "O cliente foi removido do sistema.",
+      });
+
+      fetchClients();
+    } catch (error) {
+      console.error('Erro ao excluir cliente:', error);
+      toast({
+        title: "Erro ao excluir cliente",
+        description: "Não foi possível excluir o cliente. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -242,91 +282,134 @@ const Dashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {filteredClients.map((client) => (
-                  <div
-                    key={client.id}
-                    className="border rounded-lg p-4 hover:bg-muted/20 transition-colors cursor-pointer"
-                    onClick={() => setSelectedClient(client)}
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="font-semibold text-lg">{client.name}</h3>
-                        <p className="text-muted-foreground">{client.phone}</p>
-                      </div>
-                       <div className="text-right space-y-2">
-                          {/* Status dos Criativos */}
-                          {client.creatives_status && (
-                            <div className="flex items-center gap-2 justify-end">
-                              <span className="text-xs text-muted-foreground">Criativos:</span>
-                              {client.creatives_status === 'pending' && (
-                                <span className="flex items-center gap-1 text-yellow-600 text-sm">
-                                  <Clock className="w-3 h-3" />
-                                  Aguardando envio
-                                </span>
-                              )}
-                              {client.creatives_status === 'received' && (
-                                <span className="flex items-center gap-1 text-blue-600 text-sm">
-                                  <FileCheck className="w-3 h-3" />
-                                  Em análise
-                                </span>
-                              )}
-                              {client.creatives_status === 'approved' && (
-                                <span className="flex items-center gap-1 text-green-600 text-sm">
-                                  <CheckCircle className="w-3 h-3" />
-                                  Aprovados
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          
-                          {/* Status das Legendas */}
-                          {client.captions_status && (
-                            <div className="flex items-center gap-2 justify-end">
-                              <span className="text-xs text-muted-foreground">Legendas:</span>
-                              {client.captions_status === 'pending' && (
-                                <span className="flex items-center gap-1 text-yellow-600 text-sm">
-                                  <Clock className="w-3 h-3" />
-                                  Aguardando envio
-                                </span>
-                              )}
-                              {client.captions_status === 'received' && (
-                                <span className="flex items-center gap-1 text-blue-600 text-sm">
-                                  <FileCheck className="w-3 h-3" />
-                                  Em análise
-                                </span>
-                              )}
-                              {client.captions_status === 'approved' && (
-                                <span className="flex items-center gap-1 text-green-600 text-sm">
-                                  <CheckCircle className="w-3 h-3" />
-                                  Aprovados
-                                </span>
-                              )}
-                            </div>
-                          )}
-                          
-                          {/* Se não há nenhum status, mostrar - */}
-                          {!client.creatives_status && !client.captions_status && (
-                            <span className="text-gray-400 text-sm">-</span>
-                          )}
-                          
-                          <div className="text-sm text-muted-foreground">
-                            Etapa {client.current_step}/10
-                          </div>
+                 {filteredClients.map((client) => (
+                    <div
+                      key={client.id}
+                      className="border rounded-lg p-4 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div 
+                          className="flex-1 cursor-pointer"
+                          onClick={() => setSelectedClient(client)}
+                        >
+                          <h3 className="font-semibold text-lg">{client.name}</h3>
+                          <p className="text-muted-foreground">{client.phone}</p>
                         </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progresso</span>
-                        <span>{Math.round(getProgressPercentage(client.current_step))}%</span>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right space-y-2">
+                           {/* Status dos Criativos */}
+                           {client.creatives_status && (
+                             <div className="flex items-center gap-2 justify-end">
+                               <span className="text-xs text-muted-foreground">Criativos:</span>
+                               {client.creatives_status === 'pending' && (
+                                 <span className="flex items-center gap-1 text-yellow-600 text-sm">
+                                   <Clock className="w-3 h-3" />
+                                   Aguardando envio
+                                 </span>
+                               )}
+                               {client.creatives_status === 'received' && (
+                                 <span className="flex items-center gap-1 text-blue-600 text-sm">
+                                   <FileCheck className="w-3 h-3" />
+                                   Em análise
+                                 </span>
+                               )}
+                               {client.creatives_status === 'approved' && (
+                                 <span className="flex items-center gap-1 text-green-600 text-sm">
+                                   <CheckCircle className="w-3 h-3" />
+                                   Aprovados
+                                 </span>
+                               )}
+                             </div>
+                           )}
+                           
+                           {/* Status das Legendas */}
+                           {client.captions_status && (
+                             <div className="flex items-center gap-2 justify-end">
+                               <span className="text-xs text-muted-foreground">Legendas:</span>
+                               {client.captions_status === 'pending' && (
+                                 <span className="flex items-center gap-1 text-yellow-600 text-sm">
+                                   <Clock className="w-3 h-3" />
+                                   Aguardando envio
+                                 </span>
+                               )}
+                               {client.captions_status === 'received' && (
+                                 <span className="flex items-center gap-1 text-blue-600 text-sm">
+                                   <FileCheck className="w-3 h-3" />
+                                   Em análise
+                                 </span>
+                               )}
+                               {client.captions_status === 'approved' && (
+                                 <span className="flex items-center gap-1 text-green-600 text-sm">
+                                   <CheckCircle className="w-3 h-3" />
+                                   Aprovados
+                                 </span>
+                               )}
+                             </div>
+                           )}
+                           
+                           {/* Se não há nenhum status, mostrar - */}
+                           {!client.creatives_status && !client.captions_status && (
+                             <span className="text-gray-400 text-sm">-</span>
+                           )}
+                           
+                           <div className="text-sm text-muted-foreground">
+                             Etapa {client.current_step}/10
+                           </div>
+                          </div>
+                          
+                          {/* Delete Button with Confirmation Dialog */}
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                disabled={deletingId === client.id}
+                              >
+                                {deletingId === client.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir Cliente</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta ação não pode ser desfeita. Tem certeza que deseja excluir 
+                                  o cliente <strong>{client.name}</strong>?
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDeleteClient(client.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </div>
-                      <Progress 
-                        value={getProgressPercentage(client.current_step)} 
-                        className="h-2"
-                      />
+                      
+                      <div 
+                        className="space-y-2 cursor-pointer"
+                        onClick={() => setSelectedClient(client)}
+                      >
+                        <div className="flex justify-between text-sm">
+                          <span>Progresso</span>
+                          <span>{Math.round(getProgressPercentage(client.current_step))}%</span>
+                        </div>
+                        <Progress 
+                          value={getProgressPercentage(client.current_step)} 
+                          className="h-2"
+                        />
+                      </div>
                     </div>
-                  </div>
-                ))}
+                 ))}
               </div>
             )}
           </CardContent>
