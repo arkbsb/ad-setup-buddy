@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import gitaLogo from "@/assets/gita-logo.png";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -103,6 +104,13 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-6">
+            <img 
+              src={gitaLogo} 
+              alt="Gita Logo" 
+              className="h-16 w-auto"
+            />
+          </div>
           <h1 className="text-3xl font-bold text-foreground">Setup de Tráfego</h1>
           <p className="text-muted-foreground mt-2">
             Sistema de controle e gestão de clientes
