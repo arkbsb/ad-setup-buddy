@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, Users, BarChart3, MessageSquare } from "lucide-react";
 import heroImage from "@/assets/hero-dashboard.jpg";
-import gitaLogo from "@/assets/gita-logo.png";
+import gitaLogo from "@/assets/gita-logo.svg";
 
 const Index = () => {
   const { user, loading } = useAuth();

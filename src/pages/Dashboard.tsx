@@ -22,6 +22,7 @@ import { Plus, LogOut, Users, Clock, CheckCircle, MessageSquare, FileCheck, Sear
 import { Link } from "react-router-dom";
 import ClientForm from "@/components/ClientForm";
 import SetupFlow from "@/components/SetupFlow";
+import gitaLogo from "@/assets/gita-logo.svg";
 
 interface Client {
   id: string;
@@ -170,13 +171,20 @@ const Dashboard = () => {
       <header className="bg-card border-b shadow-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                Setup de Tráfego
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Gerencie seus clientes e processos de setup
-              </p>
+            <div className="flex items-center space-x-4">
+              <img 
+                src={gitaLogo} 
+                alt="Gita Logo" 
+                className="h-10 w-auto"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">
+                  Setup de Tráfego
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Gerencie seus clientes e processos de setup
+                </p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               <Link to="/templates">

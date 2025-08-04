@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import gitaLogo from "@/assets/gita-logo.png";
+import gitaLogo from "@/assets/gita-logo.svg";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
