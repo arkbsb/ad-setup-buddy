@@ -131,9 +131,12 @@ export type Database = {
       clients: {
         Row: {
           captions_status: string | null
+          copy_legends_document_link: string | null
           created_at: string
           creatives_status: string | null
           current_step: number
+          deleted_at: string | null
+          drive_folder_link: string | null
           email: string | null
           id: string
           is_completed: boolean
@@ -144,9 +147,12 @@ export type Database = {
         }
         Insert: {
           captions_status?: string | null
+          copy_legends_document_link?: string | null
           created_at?: string
           creatives_status?: string | null
           current_step?: number
+          deleted_at?: string | null
+          drive_folder_link?: string | null
           email?: string | null
           id?: string
           is_completed?: boolean
@@ -157,9 +163,12 @@ export type Database = {
         }
         Update: {
           captions_status?: string | null
+          copy_legends_document_link?: string | null
           created_at?: string
           creatives_status?: string | null
           current_step?: number
+          deleted_at?: string | null
+          drive_folder_link?: string | null
           email?: string | null
           id?: string
           is_completed?: boolean
@@ -701,6 +710,14 @@ export type Database = {
       generate_invitation_token: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      hard_delete_client: {
+        Args: { client_id: string }
+        Returns: undefined
+      }
+      soft_delete_client: {
+        Args: { client_id: string }
+        Returns: undefined
       }
       use_invitation_token: {
         Args: { p_token: string; p_user_id?: string }

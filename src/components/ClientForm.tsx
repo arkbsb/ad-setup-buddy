@@ -21,6 +21,8 @@ const ClientForm = ({ onClose, onSuccess }: ClientFormProps) => {
     name: "",
     phone: "",
     email: "",
+    drive_folder_link: "",
+    copy_legends_document_link: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,6 +39,8 @@ const ClientForm = ({ onClose, onSuccess }: ClientFormProps) => {
           name: formData.name,
           phone: formData.phone,
           email: formData.email,
+          drive_folder_link: formData.drive_folder_link,
+          copy_legends_document_link: formData.copy_legends_document_link,
           current_step: 1,
           creatives_status: "pending",
         });
@@ -115,6 +119,28 @@ const ClientForm = ({ onClose, onSuccess }: ClientFormProps) => {
               value={formData.email}
               onChange={handleInputChange("email")}
               placeholder="email@exemplo.com"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="drive_folder_link">Link pasta do Drive</Label>
+            <Input
+              id="drive_folder_link"
+              type="url"
+              placeholder="https://drive.google.com/..."
+              value={formData.drive_folder_link}
+              onChange={handleInputChange("drive_folder_link")}
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="copy_legends_document_link">Link Documento de legendas de Copy</Label>
+            <Input
+              id="copy_legends_document_link"
+              type="url"
+              placeholder="https://docs.google.com/..."
+              value={formData.copy_legends_document_link}
+              onChange={handleInputChange("copy_legends_document_link")}
             />
           </div>
           
