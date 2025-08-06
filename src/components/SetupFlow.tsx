@@ -13,6 +13,9 @@ interface Client {
   id: string;
   name: string;
   phone: string;
+  email?: string | null;
+  drive_folder_link?: string | null;
+  copy_legends_document_link?: string | null;
   current_step: number;
   creatives_status: string;
   created_at: string;
@@ -361,6 +364,9 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
         client: {
           name: client.name,
           phone: client.phone,
+          email: client.email,
+          drive_folder_link: client.drive_folder_link,
+          copy_legends_document_link: client.copy_legends_document_link,
         },
         step: stepNumber,
         template: template.message_content,
