@@ -377,6 +377,8 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
       // Enviar webhook
       const webhookUrl = "https://autowebhook.gita.work/webhook/gita-sistema-setup-mensagens";
       
+      console.log("JSON que será enviado no webhook:", JSON.stringify(webhookData, null, 2));
+      
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: {
