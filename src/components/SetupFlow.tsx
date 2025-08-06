@@ -360,15 +360,6 @@ const SetupFlow = ({ client, onBack, onUpdate }: SetupFlowProps) => {
           return acc;
         }, {} as any);
 
-      // Debug: verificar dados do cliente
-      console.log("Dados do cliente antes do webhook:", {
-        name: client.name,
-        phone: client.phone,
-        email: client.email,
-        drive_folder_link: client.drive_folder_link,
-        copy_legends_document_link: client.copy_legends_document_link,
-      });
-
       const webhookData = {
         client: {
           name: client.name,
