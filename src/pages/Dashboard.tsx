@@ -28,6 +28,9 @@ interface Client {
   id: string;
   name: string;
   phone: string;
+  email?: string | null;
+  drive_folder_link?: string | null;
+  copy_legends_document_link?: string | null;
   current_step: number;
   creatives_status: string;
   captions_status?: string;
